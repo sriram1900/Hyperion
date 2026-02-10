@@ -1,0 +1,41 @@
+#include<iostream>
+#include<sys/socket.h>
+#include<unistd.h>
+#include<netinet/in.h>
+int main(){
+    //connection with socket
+    //1.socket-buying the phone
+    int server_fd=socket(AF_INET,SOCK_STREAM,0);
+    if(server_fd<0)
+    {
+        std::cerr<<" phone store os closed!(socket failed)"<<std::endl;
+        return-1;
+    }
+    //2.bind-setting the phone number
+    //computer needs a structured way to store your IP and Port together.
+    sockaddr_in address;
+    address.sin_family=AF_INET;
+    address.sin_addr.s_addr=INADDR_ANY;
+    address.sin_port = htons(8080);       // Room number 8080 [cite: 561]
+    if(bind(server_fd,(struct sockaddr*)&address,sizeof(address))<0){
+        std::cerr<<"room 8080 is already taken!(bind failed)"<<std::endl;
+        return -1;
+    }
+    //3.listen-turning the ringer on
+    if(listen(server_fd,3)<0){
+        std::cerr<<"ringer broken!(listen failed)"<<std::endl;
+        return -1;
+    }
+    std::cout<<"hyperion is waiting for piza order on port 8080"<<std::endl; 
+    //4.accept-answer the call
+    int new_socket=accept(server_fd,nullptr,nullptr);
+    if(new_socket<0){
+        std::cerr<<"couldn't answer the phone(accept failed)"<<std::endl;
+        return -1;
+    }
+     std::cout << "Connection accepted! A customer has arrived." << std::endl;
+     // Hang up the phones
+     close(new_socket);
+     close(server_fd);
+     return 0;
+}
