@@ -2,6 +2,7 @@
 #include<sys/socket.h>
 #include<unistd.h>
 #include<netinet/in.h>
+#include<string>
 int main(){
     //connection with socket
     //1.socket-buying the phone
@@ -27,15 +28,24 @@ int main(){
         return -1;
     }
     std::cout<<"hyperion is waiting for piza order on port 8080"<<std::endl; 
-    //4.accept-answer the call
-    int new_socket=accept(server_fd,nullptr,nullptr);
-    if(new_socket<0){
+    //we start loop here so that program never hits the final return 0
+    while(true){
+        int new_socket=accept(server_fd,nullptr,nullptr);
+        if(new_socket<0){
         std::cerr<<"couldn't answer the phone(accept failed)"<<std::endl;
-        return -1;
+        continue;
+        }
+         std::cout << "Connection accepted! A customer has arrived." << std::endl;
+         std::string response = "HTTP/1.1 200 OK\r\n\r\nHello from Hyperion!";
+        send(new_socket, response.c_str(), response.size(), 0);
+
+        // 3. Hang up the private line
+        close(new_socket); 
+        
+        std::cout << "Customer served. Waiting for next..." << std::endl;
+
     }
-     std::cout << "Connection accepted! A customer has arrived." << std::endl;
-     // Hang up the phones
-     close(new_socket);
+     // Hang up the phonee
      close(server_fd);
      return 0;
 }
