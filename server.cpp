@@ -36,6 +36,17 @@ int main(){
         continue;
         }
          std::cout << "Connection accepted! A customer has arrived." << std::endl;
+         //THE LISTENING
+        
+        // 1. We create our "Bucket" (The Buffer)
+        char buffer[1024] = {0}; 
+
+        // 2. We tell the OS: "Push data from new_socket into our buffer"
+        // This is the moment the OS hands the "message" to your code.
+        read(new_socket, buffer, 1024);
+
+        // 3. We print the message to see what the browser asked for
+        std::cout << "----- BROWSER REQUEST -----\n" << buffer << "\n----------------------" << std::endl;
          std::string response = "HTTP/1.1 200 OK\r\n\r\nHello from Hyperion!";
         send(new_socket, response.c_str(), response.size(), 0);
 
