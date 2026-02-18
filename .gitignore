@@ -1,0 +1,4 @@
+# Ignore compiled files
+Hyperion
+*.out
+*.exe
