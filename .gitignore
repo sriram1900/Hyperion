@@ -1,4 +1,7 @@
-# Ignore compiled files
+# executables
 Hyperion
-*.out
-*.exe
+server
+a.out
+
+# build folder
+build/
