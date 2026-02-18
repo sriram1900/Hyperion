@@ -47,7 +47,24 @@ int main(){
 
         // 3. We print the message to see what the browser asked for
         std::cout << "----- BROWSER REQUEST -----\n" << buffer << "\n----------------------" << std::endl;
-         std::string response = "HTTP/1.1 200 OK\r\n\r\nHello from Hyperion!";
+        // --- STEP 4: THE ROUTER (NEW CODE GOES HERE) ---
+        
+        // Convert the buffer to a string so we can search it easily
+        std::string request(buffer);
+        std::string response;
+
+        if (request.find("GET /about") != std::string::npos) {
+            // If the browser asked for /about
+            response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<h1>About Hyperion</h1><p>This is the about page!</p>";
+        } 
+        else if (request.find("GET / ") != std::string::npos) {
+            // If the browser asked for the home page (root)
+            response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<h1>Hyperion Home</h1><p>Welcome to the main server.</p>";
+        } 
+        else {
+            // If they asked for a page that doesn't exist
+            response = "HTTP/1.1 404 Not Found\r\nContent-Type: text/html\r\n\r\n<h1>404 Not Found</h1><p>Page does not exist!</p>";
+        }
         send(new_socket, response.c_str(), response.size(), 0);
 
         // 3. Hang up the private line
