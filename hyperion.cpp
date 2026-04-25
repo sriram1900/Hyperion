@@ -50,7 +50,11 @@ void handle_client(int client_socket) {
 int main() {
     // 1. Create the Socket
     int server_fd = socket(AF_INET, SOCK_STREAM, 0);
-    
+    if(server_fd<0){
+        perror("socket failed");
+        exit(EXIT_FAILURE);
+    }
+     
     // 2. Setup Address Reuse (Allows you to restart the server quickly)
     int opt = 1;
     setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
