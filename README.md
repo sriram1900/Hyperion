@@ -37,10 +37,3 @@ Note: The localhost link only works on the machine where the server is currently
 
 
 ---
-
-### 🕵️‍♂️ Summary of why we did this:
-1.  **The Link:** We removed the "clickable" link format in the README. Now, it's clear that it is an address to be typed into the browser.
-2.  **The Rejected Error:** By running `git pull --rebase`, you combined the work you did on the GitHub website with the work on your laptop. 
-3.  **The 404:** Once you run the `git push` in Step 1, your images will finally be on GitHub, and they will appear in your README automatically.
-
-**Try running those 3 Git commands now. Does it finally say "Everything up-to-date"?**
