@@ -9,7 +9,7 @@
 
 // THE WORKER: This function runs on its own separate thread for every visitor
 void handle_client(int client_socket) {
-    // 1. Announce the start (The "Numbers" you are looking for)
+    // 1. Announce the start
     std::cout << "\n[NEW REQUEST] Worker Thread " << std::this_thread::get_id() << " is starting..." << std::endl;
 
     char buffer[1024] = {0};
@@ -47,7 +47,18 @@ void handle_client(int client_socket) {
     close(client_socket); 
 }
 
-// 2. Setup Address Reuse (Allows you to restart the server quickly)
+// THE MANAGER: Sets up the server and listens
+int main() {
+    // =================================================================
+    // 1. CREATE THE SOCKET (This is the exact line your compiler missed!)
+    // =================================================================
+    int server_fd = socket(AF_INET, SOCK_STREAM, 0);
+    if (server_fd < 0) {
+        std::cerr << "Socket creation failed!" << std::endl;
+        return -1;
+    }
+
+    // 2. Setup Address Reuse (Allows you to restart the server quickly)
     int opt = 1;
     setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
 
@@ -61,6 +72,7 @@ void handle_client(int client_socket) {
         std::cerr << "Bind failed! Try a different port or wait a minute." << std::endl;
         return -1;
     }
+    std::cout << "[SUCCESS] Receptionist locked to Port 8080 successfully." << std::endl;
 
     listen(server_fd, 10); 
 
