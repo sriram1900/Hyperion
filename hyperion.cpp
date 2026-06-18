@@ -6,7 +6,50 @@
 #include <fstream>
 #include <sstream>
 #include <thread>
+#include <unordered_map>
+#include <list>
+#include <mutex>
+// ==========================================
+// 1. THE CACHE SKELETON (Placed at the very top!)
+// ==========================================
+class LRUCache {
+private:
+    int capacity; 
+    std::list<std::string> order; 
+    std::unordered_map<std::string, std::pair<std::string, std::list<std::string>::iterator>> cache_map; 
+    std::mutex cache_lock; 
 
+public:
+    // Constructor
+    LRUCache(int cap) {
+        capacity = cap;
+    }
+
+    // --- PASTE THIS NEW GET FUNCTION HERE ---
+    std::string get(const std::string& filename) {
+        // 1. Lock the cache so threads don't crash
+        std::lock_guard<std::mutex> lock(cache_lock); 
+        
+        // 2. Look inside the Hash Map. If we reach the end, it means it's not here.
+        if (cache_map.find(filename) == cache_map.end()) {
+            return ""; // Cache Miss! 
+        }
+        
+        // 3. Cache Hit! We found it. 
+        // Erase it from its old spot in the linked list...
+        order.erase(cache_map[filename].second);
+        
+        // ...and push it to the very front of the line (Most Recently Used!)
+        order.push_front(filename);
+        
+        // Update the dictionary so it knows the file's new spot at the front
+        cache_map[filename].second = order.begin();
+        
+        // Return the actual HTML text content
+        return cache_map[filename].first; 
+    }
+    // ----------------------------------------
+};
 // THE WORKER: This function runs on its own separate thread for every visitor
 void handle_client(int client_socket) {
     // 1. Announce the start
