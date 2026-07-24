@@ -66,8 +66,13 @@ public:
         cache_map[filename] = {content, order.begin()};
     }
 };
-    // ----------------------------------------
+    
+// --- NEW: one shared cache instance, used by every thread ---
+
+LRUCache page_cache(10); // holds up to 10 files at once
+
 // THE WORKER: This function runs on its own separate thread for every visitor
+
 void handle_client(int client_socket) {
     // 1. Announce the start
     std::cout << "\n[NEW REQUEST] Worker Thread " << std::this_thread::get_id() << " is starting..." << std::endl;
@@ -83,8 +88,22 @@ void handle_client(int client_socket) {
         filename = "about.html";
     }
     // 3. THE LIBRARIAN (File Serving)
-std::ifstream file(filename);
 std::string response;
+   // --- NEW: check the cache first ---
+    std::string cached_content = page_cache.get(filename);
+
+    if (!cached_content.empty()) {
+        // Cache HIT — skip disk entirely
+        response = "HTTP/1.1 200 OK\r\n"
+                   "Content-Type: text/html\r\n"
+                   "Content-Length: " + std::to_string(cached_content.size()) + "\r\n"
+                   "Connection: close\r\n"
+                   "\r\n" +
+                   cached_content;
+        std::cout << "[CACHE HIT] " << filename << std::endl;
+    } else {
+        // Cache MISS — read from disk like before
+        std::ifstream file(filename);
 
 if (file.is_open()) {
     std::stringstream ss;
@@ -98,6 +117,8 @@ if (file.is_open()) {
                "Connection: close\r\n"
                "\r\n" + 
                content;
+    page_cache.put(filename, content); // --- NEW: store it in the cache for next time
+     std::cout << "[CACHE MISS] " << filename << " read from disk and cached" << std::endl;
 } else {
     std::string not_found = "404: File Not Found";
     response = "HTTP/1.1 404 Not Found\r\n"
@@ -107,6 +128,7 @@ if (file.is_open()) {
                "\r\n" + 
                not_found;
 }
+    }
 
     // 4. THE HANDSHAKE (Send and Close)
     send(client_socket, response.c_str(), response.size(), 0);
