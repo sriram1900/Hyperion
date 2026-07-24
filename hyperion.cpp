@@ -48,8 +48,25 @@ public:
         // Return the actual HTML text content
         return cache_map[filename].first; 
     }
-    // ----------------------------------------
+        // --- NEW: put() actually adds/updates entries and evicts when full ---
+    void put(const std::string& filename, const std::string& content) {
+        std::lock_guard<std::mutex> lock(cache_lock);
+
+        if (cache_map.find(filename) != cache_map.end()) {
+            // Already cached — just remove old position, we'll re-insert at front below
+            order.erase(cache_map[filename].second);
+        } else if ((int)order.size() >= capacity) {
+            // Cache full and this is a new file — evict least recently used (back of list)
+            std::string lru_key = order.back();
+            order.pop_back();
+            cache_map.erase(lru_key);
+        }
+
+        order.push_front(filename);
+        cache_map[filename] = {content, order.begin()};
+    }
 };
+    // ----------------------------------------
 // THE WORKER: This function runs on its own separate thread for every visitor
 void handle_client(int client_socket) {
     // 1. Announce the start
@@ -65,8 +82,6 @@ void handle_client(int client_socket) {
     if (request.find("GET /about") != std::string::npos) {
         filename = "about.html";
     }
-
-    // 3. THE LIBRARIAN (File Serving)
     // 3. THE LIBRARIAN (File Serving)
 std::ifstream file(filename);
 std::string response;
