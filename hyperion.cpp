@@ -67,19 +67,31 @@ void handle_client(int client_socket) {
     }
 
     // 3. THE LIBRARIAN (File Serving)
-    std::ifstream file(filename);
-    std::string response;
+    // 3. THE LIBRARIAN (File Serving)
+std::ifstream file(filename);
+std::string response;
 
-    if (file.is_open()) {
-        std::stringstream ss;
-        ss << file.rdbuf(); // Pour the file content into the stream
-        std::string content = ss.str();
-        
-        // Build the HTTP response
-        response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n" + content;
-    } else {
-        response = "HTTP/1.1 404 Not Found\r\n\r\n<h1>404: File Not Found</h1>";
-    }
+if (file.is_open()) {
+    std::stringstream ss;
+    ss << file.rdbuf(); // Pour the file content into the stream
+    std::string content = ss.str();
+    
+    // Build the HTTP response WITH Content-Length
+    response = "HTTP/1.1 200 OK\r\n"
+               "Content-Type: text/html\r\n"
+               "Content-Length: " + std::to_string(content.size()) + "\r\n"
+               "Connection: close\r\n"
+               "\r\n" + 
+               content;
+} else {
+    std::string not_found = "404: File Not Found";
+    response = "HTTP/1.1 404 Not Found\r\n"
+               "Content-Type: text/html\r\n"
+               "Content-Length: " + std::to_string(not_found.size()) + "\r\n"
+               "Connection: close\r\n"
+               "\r\n" + 
+               not_found;
+}
 
     // 4. THE HANDSHAKE (Send and Close)
     send(client_socket, response.c_str(), response.size(), 0);
