@@ -55,13 +55,12 @@ Average: ~12,380 req/sec
 
 On the LRU cache specifically: correctly implemented and verified (confirmed via HIT/MISS logging — first request to a file logs a MISS and reads disk, every subsequent request logs a HIT and skips disk entirely). Benchmarking showed limited additional throughput gain on top of the Content-Length fix for a small, single repeatedly-requested file — most likely because Linux's own OS-level page cache was already caching it in memory. The cache's value would show more clearly under a larger working set that exceeds available OS cache — an honest finding, not a failure of the implementation.
 
-# 🏗️ Build & Run
+You can run Hyperion using Docker, or build it locally using CMake or raw g++.
 
-You can run Hyperion using Docker, or build it locally using CMake or raw `g++`.
-
-### 1. Docker (Recommended)
+1. Docker (Recommended)
 The easiest way to run the server without worrying about local C++ toolchains.
-```bash
+
+Bash
 docker build -t hyperion-server .
 docker run -p 8080:8080 -d hyperion-server
 2. Local Build: CMake
